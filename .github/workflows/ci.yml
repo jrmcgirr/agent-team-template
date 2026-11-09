@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, night]
+
+# Cancel superseded runs on PR branches; never cancel runs on main/night.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # Toolchains are set up only if the repo has that kind of project.
+      - uses: astral-sh/setup-uv@v10.3.3
+        if: hashFiles('**/pyproject.toml') != ''
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-node@v7
+        if: hashFiles('**/package.json') != ''
+        with:
+          node-version: 22
+
+      - run: corepack enable
+        if: hashFiles('**/pnpm-lock.yaml') != ''
+
+      - run: make test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-logs
+          path: agent_logs/
+          retention-days: 7

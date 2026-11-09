@@ -1,0 +1,71 @@
+{
+  "_comment": "Example only, for an imaginary 'trip planner from a voice note' idea. The kickoff writes the real one to kickoff/backlog.json.",
+  "beads": [
+    {
+      "key": "contract-stubs-served",
+      "title": "Serve the contract stubs from the API so the frontend can build against them",
+      "description": "Mount the fixed-data stubs from contracts/stubs behind the real routes in api/ until each route is implemented.",
+      "acceptance": "test_stub_routes_match_schema in api/tests/test_contracts.py passes for every route in contracts/api.openapi.yaml",
+      "lane": "backend",
+      "priority": 0,
+      "type": "task",
+      "night_ok": true,
+      "deps": ["__BEAD_SKELETON__"]
+    },
+    {
+      "key": "api-create-trip",
+      "title": "POST /trips creates a trip from a transcript",
+      "description": "Implement the create-trip route in api/routes/trips.py per contracts/api.openapi.yaml, storing to the trips table.",
+      "acceptance": "test_create_trip_returns_201 and test_create_trip_rejects_empty_transcript in api/tests/test_trips.py pass",
+      "lane": "backend",
+      "priority": 0,
+      "type": "task",
+      "night_ok": true,
+      "deps": ["contract-stubs-served"]
+    },
+    {
+      "key": "ai-itinerary-from-transcript",
+      "title": "Turn a transcript into a day-by-day itinerary with the LLM",
+      "description": "ai/itinerary.py: prompt + parser returning the Itinerary type from contracts/. Fixed instructions first for prompt caching; fake client in tests.",
+      "acceptance": "test_itinerary_parses_fixture_response in ai/tests/test_itinerary.py passes using the recorded fixture",
+      "lane": "ai",
+      "priority": 0,
+      "type": "task",
+      "night_ok": true,
+      "deps": []
+    },
+    {
+      "key": "web-trip-page",
+      "title": "Trip page renders an itinerary from the stub API",
+      "description": "web/app/trips/[id]: day cards per the DEMO.md step 3 sketch, reading GET /trips/{id} from the stub.",
+      "acceptance": "trip-page.spec.ts Playwright test shows 3 day cards for the seeded trip",
+      "lane": "frontend",
+      "priority": 0,
+      "type": "task",
+      "night_ok": false,
+      "deps": ["contract-stubs-served"]
+    },
+    {
+      "key": "tests-trip-contract",
+      "title": "Expected-failure tests for the trip routes against the contract",
+      "description": "Tester bead: strict xfail tests for every trip route response shape, naming the bead that will make each pass.",
+      "acceptance": "api/tests/test_trip_contract.py exists, runs in make test, and every test is xfail(strict=True) with a bead id",
+      "lane": "backend",
+      "priority": 1,
+      "type": "task",
+      "night_ok": true,
+      "deps": []
+    },
+    {
+      "key": "demo-seed-data",
+      "title": "Seed script for the demo trip and user",
+      "description": "scripts/seed_demo.py creates the exact records DEMO.md uses, idempotently.",
+      "acceptance": "test_seed_demo_is_idempotent in api/tests/test_seed.py passes",
+      "lane": "backend",
+      "priority": 1,
+      "type": "task",
+      "night_ok": true,
+      "deps": ["api-create-trip"]
+    }
+  ]
+}

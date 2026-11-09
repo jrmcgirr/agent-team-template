@@ -1,0 +1,18 @@
+.beadhub
+.aw/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
+
+# Team workflow
+agent_logs/
+.beadhub-cache/
+night/night.env
+.env
+.env.*
+!.env.example
+__pycache__/

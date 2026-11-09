@@ -1,0 +1,93 @@
+{
+  "_comment": "Seeded once by scripts/new-project.sh. Setup, dry runs and the kickoff beads every project starts with.",
+  "beads": [
+    {
+      "key": "onboard",
+      "title": "Onboard teammates: clone, bootstrap beads, bdh :init",
+      "description": "Each teammate follows ONBOARDING.md and gets a working coordinated workspace before the project starts.",
+      "acceptance": "Test: bdh :status on any machine lists every teammate's agents, and each teammate can bdh dolt pull and see these beads.",
+      "lane": "infra",
+      "priority": 0,
+      "type": "task",
+      "night_ok": false,
+      "deps": []
+    },
+    {
+      "key": "team-dry-run",
+      "title": "Dry run: two machines, claims, locks, chat, mail, escalate",
+      "description": "Run the team dry-run checklist in ONBOARDING.md on a throwaway branch. Pin the bdh version that passes and note token use per agent-hour.",
+      "acceptance": "Test: every item of the team dry-run checklist in ONBOARDING.md passes, including both worktree checks, and git fsck is clean in every clone.",
+      "lane": "infra",
+      "priority": 0,
+      "type": "task",
+      "night_ok": false,
+      "deps": ["onboard"]
+    },
+    {
+      "key": "night-dry-run",
+      "title": "Dry run: one night container claims a night-ok bead and merges into night",
+      "description": "Follow night/DRY_RUN.md: fill night/night.env, run the preflight, then night/launch.sh 1 against the night test bead. Confirms bdh :init works non-interactively with BEADHUB_API_KEY and bd bootstrap works over HTTPS.",
+      "acceptance": "Test: the night test bead's PR is merged into night by night-1, the bead is closed, and the loop stops by itself when no night-ok beads remain.",
+      "lane": "infra",
+      "priority": 1,
+      "type": "task",
+      "night_ok": false,
+      "deps": ["onboard"]
+    },
+    {
+      "key": "night-test",
+      "title": "DRY: make test fails if a secret file is tracked by git",
+      "description": "Night dry-run bead; day agents leave it for the night container. Small, real and stack-independent: add tests/test_no_secrets.sh that fails with one ERROR: line naming the file if git tracks .beadhub, anything under .aw/, night/night.env, or any .env or .env.* file other than .env.example. Merges into the night branch only.",
+      "acceptance": "tests/test_no_secrets.sh passes under make test and make test-fast; after git add -f of an empty .env it fails with an ERROR: line naming .env, and passes again once that file is unstaged.",
+      "lane": "infra",
+      "priority": 2,
+      "type": "task",
+      "night_ok": true,
+      "deps": []
+    },
+    {
+      "key": "skeleton",
+      "title": "Kickoff: choose stack and boot the app skeleton with one passing test",
+      "description": "Hour 0. Pick the stack for the brief, scaffold the app, and add a first test so make test runs something real.",
+      "acceptance": "make test runs at least one real suite locally and in CI; PROGRESS.md 'Current state' filled in.",
+      "lane": "infra",
+      "priority": 0,
+      "type": "task",
+      "night_ok": false,
+      "deps": []
+    },
+    {
+      "key": "kickoff",
+      "title": "Kickoff: write contracts/ (types, API schema, stubs) and the lane backlog",
+      "description": "First two hours, coordinator, using the /kickoff skill. Shared types and API schema in contracts/, stub implementations, and beads under an hour each with lane labels and night-ok where a test fully verifies them.",
+      "acceptance": "contracts/ committed; each lane has at least 5 ready beads that each name their test; bdh ready shows them.",
+      "lane": "infra",
+      "priority": 0,
+      "type": "task",
+      "night_ok": false,
+      "deps": ["skeleton"]
+    },
+    {
+      "key": "deploy",
+      "title": "Deploy pipeline: main deploys to a public demo URL",
+      "description": "Every merge to main redeploys the demo so the team always has a working URL.",
+      "acceptance": "Test: a merge to main shows up at the demo URL within a few minutes; URL recorded in PROGRESS.md.",
+      "lane": "infra",
+      "priority": 1,
+      "type": "task",
+      "night_ok": false,
+      "deps": ["skeleton"]
+    },
+    {
+      "key": "demo",
+      "title": "Demo script and pitch outline",
+      "description": "Click path for the demo plus a 3-minute pitch outline in DEMO.md; revisit before the feature freeze.",
+      "acceptance": "Test: DEMO.md has the click path and pitch outline, and the team has rehearsed it once end to end.",
+      "lane": "demo",
+      "priority": 1,
+      "type": "task",
+      "night_ok": false,
+      "deps": ["kickoff"]
+    }
+  ]
+}
